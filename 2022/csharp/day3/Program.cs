@@ -1,28 +1,35 @@
-﻿string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "input.txt");
+﻿var part1Items = new List<char>();
+var part2Items = new List<char>();
 
-var items = new List<char>();
-foreach (string rucksack in File.ReadAllLines(filePath))
+string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "input.txt");
+string[] rucksacks = File.ReadAllLines(filePath);
+for (int groupNo = 1; groupNo <= rucksacks.Length / 3; groupNo++)
 {
-    string compartment1 = rucksack[..(rucksack.Length / 2)];
-    string compartment2 = rucksack[(rucksack.Length / 2)..];
+    int groupStartIndex = (groupNo * 3) - 3;
+    
+    string rucksack1 = rucksacks[groupStartIndex];
+    string rucksack2 = rucksacks[groupStartIndex + 1];
+    string rucksack3 = rucksacks[groupStartIndex + 2];
 
-    var rucksackItems = new HashSet<char>();
-    foreach (char item in compartment1)
-        rucksackItems.Add(item);
-
-    foreach (char item in compartment2)
+    // Part 1
+    foreach (string rucksack in new[] { rucksack1, rucksack2, rucksack3 })
     {
-        if (rucksackItems.Contains(item))
-        {
-            items.Add(item);
-            break;
-        }
+        var compartment1 = new HashSet<char>(rucksack[..(rucksack.Length / 2)]);
+        var compartment2 = new HashSet<char>(rucksack[(rucksack.Length / 2)..]);
+        
+        compartment1.IntersectWith(compartment2);
+        part1Items.Add(compartment1.First());
     }
+
+    // Part 2
+    var itemsInCommon = new HashSet<char>(rucksack1);
+    itemsInCommon.IntersectWith(new HashSet<char>(rucksack2));
+    itemsInCommon.IntersectWith(new HashSet<char>(rucksack3));
+    part2Items.Add(itemsInCommon.First());
 }
 
-int sum = items.Sum(GetPriority);
-
-Console.WriteLine($"The sum of priorities of items appearing in both compartments is {sum}.");
+Console.WriteLine($"Part 1: {part1Items.Sum(GetPriority)}");
+Console.WriteLine($"Part 2: {part2Items.Sum(GetPriority)}");
 
 int GetPriority(char c)
 {
