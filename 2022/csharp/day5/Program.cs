@@ -1,32 +1,36 @@
 ﻿string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "input.txt");
 string[] lines = File.ReadAllLines(filePath);
 
-Stack<char>[]    stacks     = GetStacks(lines.Take(8));
-Queue<Procedure> procedures = GetProcedures(lines.Skip(10));
+Stack<char>[] part1Stacks = GetStacks(lines.Take(8));
+Stack<char>[] part2Stacks = GetStacks(lines.Take(8));
 
-while (procedures.Count > 0)
+foreach (Procedure proc in GetProcedures(lines.Skip(10)))
 {
-    Procedure proc = procedures.Dequeue();
+    var toMove = new Stack<char>();
     for (int i = 0; i < proc.Count; i++)
-        stacks[proc.Destination - 1].Push(stacks[proc.Source - 1].Pop());
+    {
+        // Part 1
+        part1Stacks[proc.Destination - 1].Push(part1Stacks[proc.Source - 1].Pop());
+        
+        // Part 2
+        toMove.Push(part2Stacks[proc.Source - 1].Pop());
+    }
+    
+    // Part 2 (continued)
+    while (toMove.Count > 0)
+        part2Stacks[proc.Destination - 1].Push(toMove.Pop());
 }
 
-Console.WriteLine($"Part 1: {new string(stacks.Select(s => s.Peek()).ToArray())}");
+// Results
+Console.WriteLine($"Part 1: {new string(part1Stacks.Select(s => s.Peek()).ToArray())}");
+Console.WriteLine($"Part 2: {new string(part2Stacks.Select(s => s.Peek()).ToArray())}");
 
-static Queue<Procedure> GetProcedures(IEnumerable<string> procedureLines)
-{
-    var procedures = new Queue<Procedure>();
-    foreach (string line in procedureLines)
-        procedures.Enqueue(
-            new Procedure(
-                Convert.ToInt32(line[5..7].Trim()),
-                Convert.ToInt32(line[12..14].Trim()),
-                Convert.ToInt32(line[17..].Trim())
-            )
-        );
-
-    return procedures;
-}
+static List<Procedure> GetProcedures(IEnumerable<string> procedureLines) =>
+    procedureLines.Select(line => new Procedure(
+        Convert.ToInt32(line[ 5.. 7].Trim()),
+        Convert.ToInt32(line[12..14].Trim()),
+        Convert.ToInt32(line[17..  ].Trim())
+    )).ToList();
 
 static Stack<char>[] GetStacks(IEnumerable<string> stackLines)
 {
