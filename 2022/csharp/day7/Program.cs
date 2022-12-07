@@ -1,8 +1,22 @@
-string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "input.txt");
+﻿string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "input.txt");
 DirectoryFso root = ParseInput(File.ReadAllLines(filePath));
 
 List<DirectoryFso> allDirectories = Flatten(root);
 Console.WriteLine($"Part 1: {allDirectories.Select(d => d.Size).Where(s => s <= 100000).Sum()}");
+
+const int diskSize      = 70000000;
+const int requiredSpace = 30000000;
+
+int currentSpace = diskSize - root.Size;
+
+foreach (DirectoryFso dir in allDirectories.OrderBy(d => d.Size))
+{
+    if (currentSpace + dir.Size >= requiredSpace)
+    {
+        Console.WriteLine($"Part 2: {dir.Size}");
+        break;
+    }
+}
 
 List<DirectoryFso> Flatten(DirectoryFso dir)
 {
